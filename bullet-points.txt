@@ -1,0 +1,30 @@
+⭐ Bullet Points You Should Remember (Interview Memory Sheet)
+These are the most important concepts you’ve implemented:
+
+1. Architecture
+    Async job processing
+    Separate worker service
+    DB-backed queue
+    Horizontal scalability concept
+
+2. Reliability
+    Retry policies
+    Failure handling
+    Poison job detection
+    Status lifecycle management
+
+3. Concurrency
+    Row-level locking
+    Worker isolation
+    Transaction boundaries
+
+4. Idempotency
+    At-least-once processing
+    Unique constraints
+    Duplicate protection
+
+5. Distributed Systems Thinking
+    Decoupling ingestion from processing
+    Failure-first design
+    Safe retries
+    State consistency
