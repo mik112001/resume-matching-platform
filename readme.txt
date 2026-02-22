@@ -1,245 +1,82 @@
-# Scalable Asynchronous Resume Processing Platform
+# 🚀 Distributed Resume Matching Platform
 
-## 📌 Overview
+A cloud-deployed asynchronous resume analysis system that processes resumes, generates AI embeddings, and computes semantic match scores against job descriptions.
 
-This project is a backend system that processes resumes against job descriptions using an asynchronous, distributed architecture.
-The system is designed to simulate real-world production patterns such as:
+Built with distributed systems principles including message queues, idempotent workers, retry handling, and vector search.
 
-    * Asynchronous job processing
-    * Worker isolation
-    * Retry and failure handling
-    * Idempotent processing
-    * Database-backed queue mechanisms
+---
 
-The focus of this project is **backend architecture and distributed systems concepts**, not just feature implementation.
+## 🧠 Features
 
-------------------------------------------------------------------------------------------------------------------------------
+- Resume upload (PDF / DOCX)
+- Asynchronous job processing with AWS SQS
+- Worker-based architecture
+- Idempotent processing & retry recovery
+- Resume parsing pipeline
+- OpenAI embedding generation
+- Semantic similarity scoring
+- PostgreSQL + pgvector vector storage
+- Dockerized deployment
+- AWS EC2 production deployment
 
-## 🎯 Goals
+---
 
-The main goals of this project are:
+## 🏗 Architecture
 
-    1. Accept resume uploads and job descriptions via API
-    2. Store files and metadata safely
-    3. Process jobs asynchronously using workers
-    4. Handle retries and failures reliably
-    5. Prevent duplicate processing using idempotency
-    6. Simulate real-world distributed system behavior before integrating message brokers (SQS)
+Client → API → SQS → Worker → PostgreSQL / S3 / OpenAI
 
-------------------------------------------------------------------------------------------------------------------------------
+---
 
-## 🏗 System Architecture (Local Version)
+## ⚙️ Tech Stack
 
-Client
-    → API Server (Node.js)
-    → PostgreSQL (job metadata + state)
-    → Worker Process (polling + processing)
-    → Result Storage
+**Backend**
+- Node.js
+- Express
 
-The database temporarily acts as a **job queue** using row-level locking.
+**Infrastructure**
+- Docker
+- AWS EC2
+- AWS SQS
+- AWS S3
 
-------------------------------------------------------------------------------------------------------------------------------
+**Database**
+- PostgreSQL
+- pgvector
 
-## 🧱 Core Components
+**AI**
+- OpenAI Embeddings
+- Cosine Similarity Matching
 
-### 1. API Layer
+---
 
-Responsibilities:
+## 🔄 System Design Highlights
 
-    * Validate request
-    * Upload files
-    * Store metadata
-    * Create processing job
-    * Return job status
+- Distributed async processing
+- Row-level locking & idempotency
+- Dead-letter queue handling
+- Exponential retry backoff
+- Worker crash recovery
+- Stuck job detection
+- Stateless API architecture
 
-Technology:
+---
 
-    * Node.js
-    * Express
-    * Multer
-    * PostgreSQL
+## 🚀 Deployment
 
-------------------------------------------------------------------------------------------------------------------------------
+Services are containerized using Docker and deployed on AWS EC2.
 
-### 2. Database
+---
 
-Main tables:
+## 📌 Future Improvements
 
-    * `resumes`
-    * `job_descriptions`
-    * `processing_jobs`
-    * `match_results`
+- Kubernetes deployment
+- Streaming processing
+- Multi-worker auto scaling
+- Real-time progress tracking
+- Advanced AI feedback generation
 
-The `processing_jobs` table acts as a queue.
-
-------------------------------------------------------------------------------------------------------------------------------
-
-### 3. Worker Service
-
-A separate process that:
-
-    * Polls database for pending jobs
-    * Locks rows safely
-    * Processes jobs
-    * Stores results
-    * Handles retries and failures
-
-Workers can scale horizontally.
-
-------------------------------------------------------------------------------------------------------------------------------
-
-## ⚙️ Job Lifecycle
-
-```
-pending → processing → completed
-                    ↘
-                     failed
-```
-
-States:
-
-    * <<pending>> → waiting to be processed
-    * <<processing>> → picked by worker
-    * <<completed>> → success
-    * <<failed>> → exceeded retry limit
-
-------------------------------------------------------------------------------------------------------------------------------
-
-## 🔒 Concurrency Control
-
-The system uses:
-
-```sql
-FOR UPDATE SKIP LOCKED
-```
-
-This ensures:
-
-    * Only one worker processes a job
-    * Multiple workers can run safely
-    * No duplicate processing occurs
-
-This simulates distributed worker isolation.
-
-------------------------------------------------------------------------------------------------------------------------------
-
-## 🔁 Retry & Failure Handling
-
-Features implemented:
-
-    * Retry counter
-    * Maximum retry limit
-    * Error message tracking
-    * Automatic retry for transient failures
-    * Failure state after max retries
-
-This mirrors real queue systems like Dead Letter Queues (DLQ).
-
-------------------------------------------------------------------------------------------------------------------------------
-
-## 🧠 Idempotency
-
-Because distributed systems often provide **at-least-once delivery**, jobs may execute multiple times.
-
-To prevent duplicate side effects:
-
-    * Unique constraint on `match_results.job_id`
-    * Status checks before processing
-    * Safe insert handling
-
-This guarantees:
-
-> Repeated execution produces the same final state.
-
-------------------------------------------------------------------------------------------------------------------------------
-
-## 🧪 Failure Simulation
-
-Random failures are intentionally introduced to test:
-
-    * Retry logic
-    * Worker resilience
-    * State recovery
-
-Testing failure paths is critical in distributed systems.
-
-------------------------------------------------------------------------------------------------------------------------------
-
-## 🚀 Distributed System Concepts Implemented
-
-This project demonstrates:
-
-    * Asynchronous processing
-    * Worker isolation
-    * Database-backed queue
-    * Row-level locking
-    * Retry policies
-    * Failure recovery
-    * Poison job handling
-    * Idempotent consumers
-    * Transaction safety
-    * At-least-once processing semantics
-
-------------------------------------------------------------------------------------------------------------------------------
-
-## 🔮 Future Enhancements
-
-Planned improvements:
-
-    * AWS SQS integration
-    * S3 file storage
-    * Embedding generation
-    * Vector search
-    * Horizontal worker scaling
-    * Observability (metrics & logs)
-    * Processing timeout recovery
-    * Dead letter queue
-
-------------------------------------------------------------------------------------------------------------------------------
-
-## 🧠 Key Learnings
-
-Important backend principles applied:
-
-    1. Exactly-once execution is not realistic in distributed systems.
-    2. Idempotency is required for safe retries.
-    3. Asynchronous processing improves scalability and reliability.
-    4. Database locks can simulate queue behavior.
-    5. Workers should be stateless and isolated.
-    6. Failure handling is as important as success handling.
-
-------------------------------------------------------------------------------------------------------------------------------
-
-## 📈 Why This Project Matters
-
-This project reflects real backend challenges seen in systems such as:
-    * Payment processing
-    * Event-driven platforms
-    * Job orchestration systems
-    * Document processing pipelines
-
-It focuses on **architecture maturity**, not just features.
-
-------------------------------------------------------------------------------------------------------------------------------
-
-## 🛠 Tech Stack
-    * Node.js
-    * Express
-    * PostgreSQL
-    * Multer
-    * UUID
-    * Local worker processes
-
-Future:
-    * AWS SQS
-    * AWS S3
-    * pgvector / embeddings
-
-------------------------------------------------------------------------------------------------------------------------------
+---
 
 ## 👨‍💻 Author
 
 Mukund Agarwal
-Backend Engineer — Distributed Systems & AWS
-
-------------------------------------------------------------------------------------------------------------------------------

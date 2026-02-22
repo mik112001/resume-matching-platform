@@ -1,17 +1,20 @@
 import express from "express";
 import dotenv from "dotenv";
 import uploadRoute from "./routes/upload.mjs";
+import jobRoute from "./routes/jobs.mjs";
 
 dotenv.config({ path: "../.env" });
 const app = express();
 app.use(express.json());
 
-app.use("/api", uploadRoute);
 const PORT = process.env.PORT || 3000;
 
 app.use("/health", (req, res) => {
     res.json({ status: "ok" });
 });
+
+app.use("/api", uploadRoute);
+app.use("/job", jobRoute);
 
 app.listen(PORT, () => {
     console.log(`Server is running on port 3000`);

@@ -19,9 +19,12 @@ router.post("/upload", upload.single("resume"), async(req, res) => {
         const jobProcessingId = uuidV4();
 
         const s3Key = await uploadToS3(req.file);
+        console.log("s3kEY: ", s3Key);
 
         //Use transaction and Uplaod data in resume, job description table and job processing table
         client = await pool.connect();
+
+        console.log("---------------connected--------------------");
         await client.query("BEGIN");
         await addResumeDetails(resumeId, req.file.originalname, s3Key, req.file.mimetype, client);
         await addJobDescriptionDetails(jobDescriptionId, req.body.jobDescription, client);
