@@ -2,22 +2,23 @@
 
 A cloud-deployed asynchronous resume analysis system that processes resumes, generates AI embeddings, and computes semantic match scores against job descriptions.
 
-Built with distributed systems principles including message queues, idempotent workers, retry handling, and vector search.
+This project demonstrates distributed systems architecture, fault-tolerant worker design, and vector search using modern backend and AI infrastructure.
 
 ---
 
 ## 🧠 Features
 
 - Resume upload (PDF / DOCX)
-- Asynchronous job processing with AWS SQS
-- Worker-based architecture
-- Idempotent processing & retry recovery
+- Asynchronous job processing using AWS SQS
+- Worker-based distributed architecture
+- Idempotent processing & retry handling
 - Resume parsing pipeline
 - OpenAI embedding generation
 - Semantic similarity scoring
 - PostgreSQL + pgvector vector storage
 - Dockerized deployment
-- AWS EC2 production deployment
+- AWS EC2 production hosting
+- Result retrieval API
 
 ---
 
@@ -25,25 +26,50 @@ Built with distributed systems principles including message queues, idempotent w
 
 Client → API → SQS → Worker → PostgreSQL / S3 / OpenAI
 
+flowchart LR
+
+Client[Client / Postman]
+API[API Server\nNode.js + Express\nDocker on EC2]
+SQS[AWS SQS Queue]
+Worker[Worker Service\nNode.js Docker]
+S3[AWS S3\nResume Storage]
+DB[(PostgreSQL + pgvector)]
+OpenAI[OpenAI Embeddings API]
+
+Client -->|Upload Resume| API
+API -->|Store Metadata| DB
+API -->|Upload File| S3
+API -->|Send Job| SQS
+
+SQS --> Worker
+Worker -->|Download Resume| S3
+Worker -->|Parse Text| Worker
+Worker -->|Generate Embeddings| OpenAI
+Worker -->|Store Vectors| DB
+Worker -->|Save Results| DB
+
+Client -->|Fetch Result| API
+API --> DB
+
 ---
 
 ## ⚙️ Tech Stack
 
-**Backend**
+### Backend
 - Node.js
-- Express
+- Express.js
 
-**Infrastructure**
+### Infrastructure
 - Docker
 - AWS EC2
 - AWS SQS
 - AWS S3
 
-**Database**
+### Database
 - PostgreSQL
 - pgvector
 
-**AI**
+### AI
 - OpenAI Embeddings
 - Cosine Similarity Matching
 
@@ -52,31 +78,69 @@ Client → API → SQS → Worker → PostgreSQL / S3 / OpenAI
 ## 🔄 System Design Highlights
 
 - Distributed async processing
-- Row-level locking & idempotency
-- Dead-letter queue handling
-- Exponential retry backoff
+- Idempotent workers
+- Retry & dead-letter queue handling
 - Worker crash recovery
 - Stuck job detection
 - Stateless API architecture
+- Vector similarity search
+- Fault-tolerant pipeline
+
+---
+
+## 🚀 API Endpoints
+
+### Upload Resume
+
+POST `/upload`
+
+Form-data:
+
+- resume: file
+- jobDescription: text
+
+Response:
+
+    {
+        "jobId": "...",
+        "status": "pending"
+    }
+
+
+---
+
+### Get Job Result
+
+GET `/job/:id`
+
+Response:
+
+    {
+        "status": "completed",
+        "score": 87.3
+    }
 
 ---
 
 ## 🚀 Deployment
 
-Services are containerized using Docker and deployed on AWS EC2.
+Services are containerized using Docker and deployed on AWS EC2 with PostgreSQL and pgvector installed on the host machine.
 
 ---
 
 ## 📌 Future Improvements
 
 - Kubernetes deployment
-- Streaming processing
-- Multi-worker auto scaling
+- Auto-scaling workers
 - Real-time progress tracking
 - Advanced AI feedback generation
+- Authentication & multi-user support
 
 ---
 
 ## 👨‍💻 Author
 
 Mukund Agarwal
+:::
+
+---
